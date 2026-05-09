@@ -1,0 +1,327 @@
+{
+  "info": {
+    "name": "LMS Microservices (Complete)",
+    "description": "Complete Postman Collection for Library Management System (Auth and Catalog Services)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Auth Service",
+      "item": [
+        {
+          "name": "Register (User)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"NewUser@123\",\n  \"role\": \"ROLE_USER\",\n  \"memberId\": 101\n}"},
+            "url": {"raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"]}
+          }
+        },
+        {
+          "name": "Register (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"newadmin\",\n  \"password\": \"NewAdmin@123\",\n  \"role\": \"ROLE_ADMIN\",\n  \"adminSecret\": \"mySuperSecretAdminKey123\"\n}"},
+            "url": {"raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"]}
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [{"listen": "test", "script": {"exec": ["var jsonData = pm.response.json();", "if(jsonData.success && jsonData.data.accessToken) { pm.collectionVariables.set(\"adminToken\", jsonData.data.accessToken); }"], "type": "text/javascript"}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin@123\"\n}"},
+            "url": {"raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"]}
+          }
+        },
+        {
+          "name": "Login (User)",
+          "event": [{"listen": "test", "script": {"exec": ["var jsonData = pm.response.json();", "if(jsonData.success && jsonData.data.accessToken) { pm.collectionVariables.set(\"userToken\", jsonData.data.accessToken); }"], "type": "text/javascript"}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"user1\",\n  \"password\": \"User1@123\"\n}"},
+            "url": {"raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"]}
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"refreshToken\": \"PUT_REFRESH_TOKEN_HERE\"\n}"},
+            "url": {"raw": "{{baseUrl}}/api/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api", "auth", "refresh"]}
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"oldPassword\": \"User1@123\",\n  \"newPassword\": \"NewPassword@123\"\n}"},
+            "url": {"raw": "{{baseUrl}}/api/auth/change-password", "host": ["{{baseUrl}}"], "path": ["api", "auth", "change-password"]}
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api", "auth", "logout"]}
+          }
+        },
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/api/admin/auth/users", "host": ["{{baseUrl}}"], "path": ["api", "admin", "auth", "users"]}
+          }
+        },
+        {
+          "name": "Toggle User Status (Admin)",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"active\": false\n}"},
+            "url": {"raw": "{{baseUrl}}/api/admin/auth/users/2/status", "host": ["{{baseUrl}}"], "path": ["api", "admin", "auth", "users", "2", "status"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Catalog Service (User)",
+      "item": [
+        {
+          "name": "Get All Books",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/api/user/books?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "user", "books"], "query": [{"key": "page", "value": "0"}, {"key": "size", "value": "10"}]}
+          }
+        },
+        {
+          "name": "Get Book by ID",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/api/user/books/1", "host": ["{{baseUrl}}"], "path": ["api", "user", "books", "1"]}
+          }
+        },
+        {
+          "name": "Search Books",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/api/user/books/search?title=Clean", "host": ["{{baseUrl}}"], "path": ["api", "user", "books", "search"], "query": [{"key": "title", "value": "Clean"}]}
+          }
+        },
+        {
+          "name": "Get Available Books",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/api/user/books/available", "host": ["{{baseUrl}}"], "path": ["api", "user", "books", "available"]}
+          }
+        },
+        {
+          "name": "Get Categories",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/api/user/books/categories", "host": ["{{baseUrl}}"], "path": ["api", "user", "books", "categories"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Catalog Service (Admin)",
+      "item": [
+        {
+          "name": "Books",
+          "item": [
+            {
+              "name": "Get All Books",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {"raw": "{{baseUrl}}/api/admin/books", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books"]}
+              }
+            },
+            {
+              "name": "Add Book",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"title\": \"Spring Boot Microservices\",\n  \"author\": \"John Doe\",\n  \"isbn\": \"978-1-23-456789-0\",\n  \"category\": \"Technology\",\n  \"description\": \"A comprehensive guide to microservices\",\n  \"status\": \"ACTIVE\"\n}"},
+                "url": {"raw": "{{baseUrl}}/api/admin/books", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books"]}
+              }
+            },
+            {
+              "name": "Get Book by ID",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {"raw": "{{baseUrl}}/api/admin/books/1", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "1"]}
+              }
+            },
+            {
+              "name": "Update Book",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"title\": \"Updated Book Title\",\n  \"author\": \"Updated Author\",\n  \"isbn\": \"978-1-23-456789-0\",\n  \"category\": \"Technology\",\n  \"description\": \"Updated description\",\n  \"status\": \"ACTIVE\"\n}"},
+                "url": {"raw": "{{baseUrl}}/api/admin/books/1", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "1"]}
+              }
+            },
+            {
+              "name": "Delete Book",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "DELETE",
+                "header": [],
+                "url": {"raw": "{{baseUrl}}/api/admin/books/1", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "1"]}
+              }
+            },
+            {
+              "name": "Search Books",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {"raw": "{{baseUrl}}/api/admin/books/search?category=Technology", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "search"], "query": [{"key": "category", "value": "Technology"}]}
+              }
+            }
+          ]
+        },
+        {
+          "name": "Book Copies",
+          "item": [
+            {
+              "name": "Get Copies by Book",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {"raw": "{{baseUrl}}/api/admin/books/2/copies", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "2", "copies"]}
+              }
+            },
+            {
+              "name": "Add Copy",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"copyNumber\": \"978-0-45-152493-5-C3\",\n  \"condition\": \"New\",\n  \"status\": \"AVAILABLE\"\n}"},
+                "url": {"raw": "{{baseUrl}}/api/admin/books/2/copies", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "2", "copies"]}
+              }
+            },
+            {
+              "name": "Update Copy Status",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"status\": \"BORROWED\"\n}"},
+                "url": {"raw": "{{baseUrl}}/api/admin/books/2/copies/3/status", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "2", "copies", "3", "status"]}
+              }
+            },
+            {
+              "name": "Delete Copy",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "DELETE",
+                "header": [],
+                "url": {"raw": "{{baseUrl}}/api/admin/books/2/copies/3", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "2", "copies", "3"]}
+              }
+            }
+          ]
+        },
+        {
+          "name": "Librarians",
+          "item": [
+            {
+              "name": "Get All Librarians",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {"raw": "{{baseUrl}}/api/admin/librarians", "host": ["{{baseUrl}}"], "path": ["api", "admin", "librarians"]}
+              }
+            },
+            {
+              "name": "Add Librarian",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"name\": \"Charlie Brown\",\n  \"email\": \"charlie@lms.com\",\n  \"phone\": \"555-0103\",\n  \"employeeId\": \"LIB-003\",\n  \"department\": \"Science\"\n}"},
+                "url": {"raw": "{{baseUrl}}/api/admin/librarians", "host": ["{{baseUrl}}"], "path": ["api", "admin", "librarians"]}
+              }
+            },
+            {
+              "name": "Get Librarian by ID",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {"raw": "{{baseUrl}}/api/admin/librarians/1", "host": ["{{baseUrl}}"], "path": ["api", "admin", "librarians", "1"]}
+              }
+            },
+            {
+              "name": "Update Librarian",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"name\": \"Charlie Brown Jr.\",\n  \"email\": \"charlie@lms.com\",\n  \"phone\": \"555-0103\",\n  \"employeeId\": \"LIB-003\",\n  \"department\": \"Science Fiction\"\n}"},
+                "url": {"raw": "{{baseUrl}}/api/admin/librarians/3", "host": ["{{baseUrl}}"], "path": ["api", "admin", "librarians", "3"]}
+              }
+            },
+            {
+              "name": "Delete Librarian",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "DELETE",
+                "header": [],
+                "url": {"raw": "{{baseUrl}}/api/admin/librarians/3", "host": ["{{baseUrl}}"], "path": ["api", "admin", "librarians", "3"]}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
