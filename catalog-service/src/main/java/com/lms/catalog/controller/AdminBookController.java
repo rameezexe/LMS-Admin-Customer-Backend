@@ -64,6 +64,21 @@ public class AdminBookController {
         return ResponseEntity.ok(ApiResponse.ok("Book deleted successfully", null));
     }
 
+    @PostMapping(value = "/{id}/cover", consumes = "multipart/form-data")
+    @Operation(summary = "Upload book cover image")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ApiResponse<BookDTO>> uploadBookCover(@PathVariable Long id, @RequestPart("file") org.springframework.web.multipart.MultipartFile file) {
+        BookDTO updated = bookService.uploadBookCover(id, file);
+        return ResponseEntity.ok(ApiResponse.ok("Cover image uploaded successfully", updated));
+    }
+
+    @DeleteMapping("/{id}/cover")
+    @Operation(summary = "Remove book cover image")
+    public ResponseEntity<ApiResponse<Void>> removeBookCover(@PathVariable Long id) {
+        bookService.removeBookCover(id);
+        return ResponseEntity.ok(ApiResponse.ok("Cover image removed successfully", null));
+    }
+
     @GetMapping("/search")
     @Operation(summary = "Search books by title, author, or category")
     public ResponseEntity<ApiResponse<Page<BookDTO>>> searchBooks(

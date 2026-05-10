@@ -19,10 +19,12 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final BookCopyRepository bookCopyRepository;
+    private final S3Service s3Service;
 
-    public BookService(BookRepository bookRepository, BookCopyRepository bookCopyRepository) {
+    public BookService(BookRepository bookRepository, BookCopyRepository bookCopyRepository, S3Service s3Service) {
         this.bookRepository = bookRepository;
         this.bookCopyRepository = bookCopyRepository;
+        this.s3Service = s3Service;
     }
 
     public BookDTO addBook(BookDTO dto) {
@@ -87,6 +89,31 @@ public class BookService {
         return toDTO(book);
     }
 
+    public BookDTO uploadBookCover(Long bookId, org.springframework.web.multipart.MultipartFile file) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found with id: " + bookId));
+        
+        if (book.getCoverImageUrl() != null) {
+            s3Service.deleteFile(book.getCoverImageUrl());
+        }
+        
+        String url = s3Service.uploadFile(file, "book-covers");
+        book.setCoverImageUrl(url);
+        return toDTO(bookRepository.save(book));
+    }
+
+    @Transactional
+    public void removeBookCover(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found with id: " + bookId));
+        
+        if (book.getCoverImageUrl() != null) {
+            s3Service.deleteFile(book.getCoverImageUrl());
+            book.setCoverImageUrl(null);
+            bookRepository.save(book);
+        }
+    }
+
     public Page<BookDTO> getAllBooks(Pageable pageable) {
         return bookRepository.findAll(pageable).map(this::toDTO);
     }
@@ -119,6 +146,7 @@ public class BookService {
                 .totalCopies(book.getTotalCopies())
                 .availableCopies(book.getAvailableCopies())
                 .status(book.getStatus())
+                .coverImageUrl(book.getCoverImageUrl())
                 .build();
     }
 }

@@ -45,6 +45,9 @@ public class Member {
     @Column(nullable = false)
     private LocalDate joinDate;
 
+    @Column(name = "profile_photo_url", length = 500)
+    private String profilePhotoUrl;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

@@ -616,6 +616,58 @@
                   ]
                 }
               }
+            },
+            {
+              "name": "Upload Book Cover (S3)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books/1/cover",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books",
+                    "1",
+                    "cover"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Remove Book Cover (S3)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books/1/cover",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books",
+                    "1",
+                    "cover"
+                  ]
+                }
+              }
             }
           ]
         },
@@ -1304,6 +1356,58 @@
                   ]
                 }
               }
+            },
+            {
+              "name": "Admin Upload Member Photo (S3)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/admin/members/1/photo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "members",
+                    "1",
+                    "photo"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Admin Remove Member Photo (S3)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/admin/members/1/photo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "members",
+                    "1",
+                    "photo"
+                  ]
+                }
+              }
             }
           ]
         },
@@ -1390,6 +1494,58 @@
                     "profile",
                     "1",
                     "membership"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "User Upload Profile Photo (S3)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/user/profile/1/photo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "profile",
+                    "1",
+                    "photo"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "User Remove Profile Photo (S3)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/user/profile/1/photo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "profile",
+                    "1",
+                    "photo"
                   ]
                 }
               }

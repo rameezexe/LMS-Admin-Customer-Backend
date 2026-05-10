@@ -53,6 +53,26 @@ public class MemberUserController {
         return ResponseEntity.ok(ApiResponse.ok("Profile updated successfully", member));
     }
 
+    @PostMapping(value = "/{memberId}/photo", consumes = "multipart/form-data")
+    @Operation(summary = "Upload user's own profile photo")
+    public ResponseEntity<ApiResponse<MemberDTO>> uploadProfilePhoto(
+            @PathVariable Long memberId,
+            @RequestPart("file") org.springframework.web.multipart.MultipartFile file) {
+        Long jwtMemberId = securityHelper.extractMemberIdFromContext();
+        String jwtRole = securityHelper.isAdmin() ? "ROLE_ADMIN" : "ROLE_USER";
+        MemberDTO member = memberService.uploadProfilePhoto(memberId, file, jwtMemberId, jwtRole);
+        return ResponseEntity.ok(ApiResponse.ok("Profile photo uploaded successfully", member));
+    }
+
+    @DeleteMapping("/{memberId}/photo")
+    @Operation(summary = "Remove user's own profile photo")
+    public ResponseEntity<ApiResponse<Void>> removeProfilePhoto(@PathVariable Long memberId) {
+        Long jwtMemberId = securityHelper.extractMemberIdFromContext();
+        String jwtRole = securityHelper.isAdmin() ? "ROLE_ADMIN" : "ROLE_USER";
+        memberService.removeProfilePhoto(memberId, jwtMemberId, jwtRole);
+        return ResponseEntity.ok(ApiResponse.ok("Profile photo removed successfully", null));
+    }
+
     @GetMapping("/{memberId}/membership")
     @Operation(summary = "Get user's membership details")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getMembershipDetails(@PathVariable Long memberId) {

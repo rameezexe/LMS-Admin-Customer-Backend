@@ -60,6 +60,22 @@ public class MemberAdminController {
         return ResponseEntity.ok(ApiResponse.ok("Member registered successfully", member));
     }
 
+    @PostMapping(value = "/{memberId}/photo", consumes = "multipart/form-data")
+    @Operation(summary = "Upload profile photo for a member")
+    public ResponseEntity<ApiResponse<MemberDTO>> uploadProfilePhoto(
+            @PathVariable Long memberId,
+            @RequestPart("file") org.springframework.web.multipart.MultipartFile file) {
+        MemberDTO member = memberService.uploadProfilePhoto(memberId, file, null, "ROLE_ADMIN");
+        return ResponseEntity.ok(ApiResponse.ok("Profile photo uploaded successfully", member));
+    }
+
+    @DeleteMapping("/{memberId}/photo")
+    @Operation(summary = "Remove profile photo for a member")
+    public ResponseEntity<ApiResponse<Void>> removeProfilePhoto(@PathVariable Long memberId) {
+        memberService.removeProfilePhoto(memberId, null, "ROLE_ADMIN");
+        return ResponseEntity.ok(ApiResponse.ok("Profile photo removed successfully", null));
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Update member profile")
     public ResponseEntity<ApiResponse<MemberDTO>> updateProfile(@PathVariable Long id, @RequestBody MemberRegistrationDTO request) {

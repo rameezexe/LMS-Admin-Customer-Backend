@@ -1,4 +1,0 @@
-com/lms/gateway/util/JwtUtil.class
-com/lms/gateway/config/CorsConfig.class
-com/lms/gateway/filter/GlobalJwtFilter.class
-com/lms/gateway/ApiGatewayApplication.class

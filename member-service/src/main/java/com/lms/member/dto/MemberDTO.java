@@ -19,4 +19,5 @@ public class MemberDTO {
     private MembershipType membershipType;
     private MemberStatus status;
     private LocalDate joinDate;
+    private String profilePhotoUrl;
 }

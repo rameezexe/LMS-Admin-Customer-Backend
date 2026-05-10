@@ -47,6 +47,9 @@ public class Book {
     @Builder.Default
     private BookStatus status = BookStatus.ACTIVE;
 
+    @Column(length = 500)
+    private String coverImageUrl;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

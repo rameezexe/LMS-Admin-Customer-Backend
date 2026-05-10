@@ -32,4 +32,5 @@ public class BookDTO {
     private int totalCopies;
     private int availableCopies;
     private BookStatus status;
+    private String coverImageUrl;
 }

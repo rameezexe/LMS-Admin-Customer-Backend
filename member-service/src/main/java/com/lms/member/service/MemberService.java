@@ -18,9 +18,11 @@ import java.util.UUID;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final S3Service s3Service;
 
-    public MemberService(MemberRepository memberRepository) {
+    public MemberService(MemberRepository memberRepository, S3Service s3Service) {
         this.memberRepository = memberRepository;
+        this.s3Service = s3Service;
     }
 
     public MemberDTO registerMember(MemberRegistrationDTO dto) {
@@ -49,6 +51,42 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + id));
         return toDTO(member);
+    }
+
+    public MemberDTO uploadProfilePhoto(Long memberId, org.springframework.web.multipart.MultipartFile file, Long jwtMemberId, String jwtRole) {
+        if ("ROLE_USER".equals(jwtRole)) {
+            if (jwtMemberId == null || !jwtMemberId.equals(memberId)) {
+                throw new org.springframework.security.access.AccessDeniedException("You can only upload your own photo");
+            }
+        }
+        
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + memberId));
+        
+        if (member.getProfilePhotoUrl() != null) {
+            s3Service.deleteFile(member.getProfilePhotoUrl());
+        }
+        
+        String url = s3Service.uploadFile(file, "profile-photos/" + memberId);
+        member.setProfilePhotoUrl(url);
+        return toDTO(memberRepository.save(member));
+    }
+
+    public void removeProfilePhoto(Long memberId, Long jwtMemberId, String jwtRole) {
+        if ("ROLE_USER".equals(jwtRole)) {
+            if (jwtMemberId == null || !jwtMemberId.equals(memberId)) {
+                throw new org.springframework.security.access.AccessDeniedException("You can only remove your own photo");
+            }
+        }
+        
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + memberId));
+        
+        if (member.getProfilePhotoUrl() != null) {
+            s3Service.deleteFile(member.getProfilePhotoUrl());
+            member.setProfilePhotoUrl(null);
+            memberRepository.save(member);
+        }
     }
 
     public Page<MemberDTO> getAllMembers(Pageable pageable) {
@@ -111,6 +149,7 @@ public class MemberService {
                 .membershipType(member.getMembershipType())
                 .status(member.getStatus())
                 .joinDate(member.getJoinDate())
+                .profilePhotoUrl(member.getProfilePhotoUrl())
                 .build();
     }
 }
