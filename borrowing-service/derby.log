@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Sat May 09 21:44:48 IST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-019e-0d85-1c21-000001fcca98 
+on database directory /Users/rameez/TCS/LMS (Customer + Admin) Backend/borrowing-service/data/borrowingDB with class loader org.springframework.boot.loader.launch.LaunchedClassLoader@372f7a8d 
+Loaded from jar:nested:/Users/rameez/TCS/LMS%20(Customer%20+%20Admin)%20Backend/borrowing-service/target/borrowing-service-1.0.0.jar/!BOOT-INF/lib/derby-10.16.1.1.jar!/
+java.vendor=Homebrew
+java.runtime.version=25.0.1
+user.dir=/Users/rameez/TCS/LMS (Customer + Admin) Backend/borrowing-service
+os.name=Mac OS X
+os.arch=aarch64
+os.version=26.4.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

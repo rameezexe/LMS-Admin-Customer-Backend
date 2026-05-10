@@ -1,322 +1,1041 @@
 {
   "info": {
-    "name": "LMS Microservices (Complete)",
-    "description": "Complete Postman Collection for Library Management System (Auth and Catalog Services)",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "name": "LMS - Library Management System (All Services)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Complete Postman collection for all LMS microservices.\n\nServices:\n- Auth Service (8081)\n- Catalog Service (8082)\n- Member Service (8083)\n- Borrowing Service (8084)\n\nDefault credentials:\n- Admin: admin / Admin@123\n- User1: user1 / User1@123 (memberId=1)\n- User2: user2 / User2@123 (memberId=2)"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080",
-      "type": "string"
+      "value": "http://localhost"
+    },
+    {
+      "key": "authPort",
+      "value": "8081"
+    },
+    {
+      "key": "catalogPort",
+      "value": "8082"
+    },
+    {
+      "key": "memberPort",
+      "value": "8083"
+    },
+    {
+      "key": "borrowPort",
+      "value": "8084"
     },
     {
       "key": "adminToken",
-      "value": "",
+      "value": ""
+    },
+    {
+      "key": "user1Token",
+      "value": ""
+    },
+    {
+      "key": "user2Token",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "paymentPort",
+      "value": "8085",
       "type": "string"
     },
     {
-      "key": "userToken",
-      "value": "",
+      "key": "notifPort",
+      "value": "8086",
       "type": "string"
     }
   ],
   "item": [
     {
-      "name": "1. Auth Service",
+      "name": "1. Auth Service (8081)",
       "item": [
         {
-          "name": "Register (User)",
-          "request": {
-            "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"NewUser@123\",\n  \"role\": \"ROLE_USER\",\n  \"memberId\": 101\n}"},
-            "url": {"raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"]}
-          }
-        },
-        {
-          "name": "Register (Admin)",
-          "request": {
-            "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"username\": \"newadmin\",\n  \"password\": \"NewAdmin@123\",\n  \"role\": \"ROLE_ADMIN\",\n  \"adminSecret\": \"mySuperSecretAdminKey123\"\n}"},
-            "url": {"raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"]}
-          }
-        },
-        {
-          "name": "Login (Admin)",
-          "event": [{"listen": "test", "script": {"exec": ["var jsonData = pm.response.json();", "if(jsonData.success && jsonData.data.accessToken) { pm.collectionVariables.set(\"adminToken\", jsonData.data.accessToken); }"], "type": "text/javascript"}}],
-          "request": {
-            "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin@123\"\n}"},
-            "url": {"raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"]}
-          }
-        },
-        {
-          "name": "Login (User)",
-          "event": [{"listen": "test", "script": {"exec": ["var jsonData = pm.response.json();", "if(jsonData.success && jsonData.data.accessToken) { pm.collectionVariables.set(\"userToken\", jsonData.data.accessToken); }"], "type": "text/javascript"}}],
-          "request": {
-            "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"username\": \"user1\",\n  \"password\": \"User1@123\"\n}"},
-            "url": {"raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"]}
-          }
-        },
-        {
-          "name": "Refresh Token",
-          "request": {
-            "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"refreshToken\": \"PUT_REFRESH_TOKEN_HERE\"\n}"},
-            "url": {"raw": "{{baseUrl}}/api/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api", "auth", "refresh"]}
-          }
-        },
-        {
-          "name": "Change Password",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
-            "method": "PUT",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"oldPassword\": \"User1@123\",\n  \"newPassword\": \"NewPassword@123\"\n}"},
-            "url": {"raw": "{{baseUrl}}/api/auth/change-password", "host": ["{{baseUrl}}"], "path": ["api", "auth", "change-password"]}
-          }
-        },
-        {
-          "name": "Logout",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
-            "method": "POST",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api", "auth", "logout"]}
-          }
-        },
-        {
-          "name": "Get All Users (Admin)",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/admin/auth/users", "host": ["{{baseUrl}}"], "path": ["api", "admin", "auth", "users"]}
-          }
-        },
-        {
-          "name": "Toggle User Status (Admin)",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-            "method": "PUT",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"active\": false\n}"},
-            "url": {"raw": "{{baseUrl}}/api/admin/auth/users/2/status", "host": ["{{baseUrl}}"], "path": ["api", "admin", "auth", "users", "2", "status"]}
-          }
-        }
-      ]
-    },
-    {
-      "name": "2. Catalog Service (User)",
-      "item": [
-        {
-          "name": "Get All Books",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/user/books?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "user", "books"], "query": [{"key": "page", "value": "0"}, {"key": "size", "value": "10"}]}
-          }
-        },
-        {
-          "name": "Get Book by ID",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/user/books/1", "host": ["{{baseUrl}}"], "path": ["api", "user", "books", "1"]}
-          }
-        },
-        {
-          "name": "Search Books",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/user/books/search?title=Clean", "host": ["{{baseUrl}}"], "path": ["api", "user", "books", "search"], "query": [{"key": "title", "value": "Clean"}]}
-          }
-        },
-        {
-          "name": "Get Available Books",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/user/books/available", "host": ["{{baseUrl}}"], "path": ["api", "user", "books", "available"]}
-          }
-        },
-        {
-          "name": "Get Categories",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/user/books/categories", "host": ["{{baseUrl}}"], "path": ["api", "user", "books", "categories"]}
-          }
-        }
-      ]
-    },
-    {
-      "name": "3. Catalog Service (Admin)",
-      "item": [
-        {
-          "name": "Books",
+          "name": "Public",
           "item": [
             {
-              "name": "Get All Books",
+              "name": "Register User",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-                "method": "GET",
-                "header": [],
-                "url": {"raw": "{{baseUrl}}/api/admin/books", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books"]}
-              }
-            },
-            {
-              "name": "Add Book",
-              "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
                 "method": "POST",
-                "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"title\": \"Spring Boot Microservices\",\n  \"author\": \"John Doe\",\n  \"isbn\": \"978-1-23-456789-0\",\n  \"category\": \"Technology\",\n  \"description\": \"A comprehensive guide to microservices\",\n  \"status\": \"ACTIVE\"\n}"},
-                "url": {"raw": "{{baseUrl}}/api/admin/books", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books"]}
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{authPort}}/api/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{authPort}}",
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"NewUser@123\",\n  \"role\": \"ROLE_USER\",\n  \"memberId\": 3\n}"
+                }
               }
             },
             {
-              "name": "Get Book by ID",
+              "name": "Register Admin",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{authPort}}/api/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{authPort}}",
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"newadmin\",\n  \"password\": \"NewAdmin@123\",\n  \"role\": \"ROLE_ADMIN\",\n  \"adminSecret\": \"SUPER_SECRET_ADMIN_KEY\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Login Admin",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var json = pm.response.json();",
+                      "if(json.success && json.data) {",
+                      "  pm.collectionVariables.set('adminToken', json.data.accessToken);",
+                      "  pm.collectionVariables.set('refreshToken', json.data.refreshToken);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{authPort}}/api/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{authPort}}",
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin@123\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Login User1",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var json = pm.response.json();",
+                      "if(json.success && json.data) {",
+                      "  pm.collectionVariables.set('user1Token', json.data.accessToken);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{authPort}}/api/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{authPort}}",
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"user1\",\n  \"password\": \"User1@123\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Login User2",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var json = pm.response.json();",
+                      "if(json.success && json.data) {",
+                      "  pm.collectionVariables.set('user2Token', json.data.accessToken);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{authPort}}/api/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{authPort}}",
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"user2\",\n  \"password\": \"User2@123\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Refresh Token",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{authPort}}/api/auth/refresh",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{authPort}}",
+                  "path": [
+                    "api",
+                    "auth",
+                    "refresh"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Logout",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{authPort}}/api/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{authPort}}",
+                  "path": [
+                    "api",
+                    "auth",
+                    "logout"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Change Password",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{authPort}}/api/auth/change-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{authPort}}",
+                  "path": [
+                    "api",
+                    "auth",
+                    "change-password"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"oldPassword\": \"User1@123\",\n  \"newPassword\": \"User1@1234\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin",
+          "item": [
+            {
+              "name": "Get All Users",
+              "request": {
                 "method": "GET",
-                "header": [],
-                "url": {"raw": "{{baseUrl}}/api/admin/books/1", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "1"]}
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{authPort}}/api/admin/auth/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{authPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "auth",
+                    "users"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Deactivate User",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{authPort}}/api/admin/auth/users/2/deactivate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{authPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "auth",
+                    "users",
+                    "2",
+                    "deactivate"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Activate User",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{authPort}}/api/admin/auth/users/2/activate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{authPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "auth",
+                    "users",
+                    "2",
+                    "activate"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Catalog Service (8082)",
+      "item": [
+        {
+          "name": "Admin - Books",
+          "item": [
+            {
+              "name": "Get All Books (pageable)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books?page=0&size=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Book By ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Book",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Clean Architecture\",\n  \"author\": \"Robert C. Martin\",\n  \"isbn\": \"978-0134494166\",\n  \"category\": \"Software Engineering\",\n  \"description\": \"A guide to software structure and design\"\n}"
+                }
               }
             },
             {
               "name": "Update Book",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
                 "method": "PUT",
-                "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"title\": \"Updated Book Title\",\n  \"author\": \"Updated Author\",\n  \"isbn\": \"978-1-23-456789-0\",\n  \"category\": \"Technology\",\n  \"description\": \"Updated description\",\n  \"status\": \"ACTIVE\"\n}"},
-                "url": {"raw": "{{baseUrl}}/api/admin/books/1", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "1"]}
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books",
+                    "1"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Clean Architecture (Updated)\",\n  \"author\": \"Robert C. Martin\",\n  \"isbn\": \"978-0134494166\",\n  \"category\": \"Software Engineering\",\n  \"description\": \"Updated description\"\n}"
+                }
               }
             },
             {
               "name": "Delete Book",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
                 "method": "DELETE",
-                "header": [],
-                "url": {"raw": "{{baseUrl}}/api/admin/books/1", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "1"]}
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books",
+                    "1"
+                  ]
+                }
               }
             },
             {
-              "name": "Search Books",
+              "name": "Search Books (Admin)",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
                 "method": "GET",
-                "header": [],
-                "url": {"raw": "{{baseUrl}}/api/admin/books/search?category=Technology", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "search"], "query": [{"key": "category", "value": "Technology"}]}
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books/search?title=Java&author=&isbn=&category=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "title",
+                      "value": "Java"
+                    },
+                    {
+                      "key": "author",
+                      "value": ""
+                    },
+                    {
+                      "key": "isbn",
+                      "value": ""
+                    },
+                    {
+                      "key": "category",
+                      "value": ""
+                    }
+                  ]
+                }
               }
             }
           ]
         },
         {
-          "name": "Book Copies",
+          "name": "Admin - Book Copies",
           "item": [
             {
-              "name": "Get Copies by Book",
+              "name": "Get Copies for Book",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
                 "method": "GET",
-                "header": [],
-                "url": {"raw": "{{baseUrl}}/api/admin/books/2/copies", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "2", "copies"]}
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books/1/copies",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books",
+                    "1",
+                    "copies"
+                  ]
+                }
               }
             },
             {
-              "name": "Add Copy",
+              "name": "Add Copy to Book",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
                 "method": "POST",
-                "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"copyNumber\": \"978-0-45-152493-5-C3\",\n  \"condition\": \"New\",\n  \"status\": \"AVAILABLE\"\n}"},
-                "url": {"raw": "{{baseUrl}}/api/admin/books/2/copies", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "2", "copies"]}
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books/1/copies",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books",
+                    "1",
+                    "copies"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"copyNumber\": \"COPY-NEW-001\",\n  \"condition\": \"NEW\"\n}"
+                }
               }
             },
             {
               "name": "Update Copy Status",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
                 "method": "PUT",
-                "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"status\": \"BORROWED\"\n}"},
-                "url": {"raw": "{{baseUrl}}/api/admin/books/2/copies/3/status", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "2", "copies", "3", "status"]}
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books/1/copies/1/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books",
+                    "1",
+                    "copies",
+                    "1",
+                    "status"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"CHECKED_OUT\"\n}"
+                }
               }
             },
             {
               "name": "Delete Copy",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
                 "method": "DELETE",
-                "header": [],
-                "url": {"raw": "{{baseUrl}}/api/admin/books/2/copies/3", "host": ["{{baseUrl}}"], "path": ["api", "admin", "books", "2", "copies", "3"]}
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/books/1/copies/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "books",
+                    "1",
+                    "copies",
+                    "1"
+                  ]
+                }
               }
             }
           ]
         },
         {
-          "name": "Librarians",
+          "name": "Admin - Librarians",
           "item": [
             {
               "name": "Get All Librarians",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
                 "method": "GET",
-                "header": [],
-                "url": {"raw": "{{baseUrl}}/api/admin/librarians", "host": ["{{baseUrl}}"], "path": ["api", "admin", "librarians"]}
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/librarians",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "librarians"
+                  ]
+                }
               }
             },
             {
-              "name": "Add Librarian",
+              "name": "Get Librarian By ID",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/librarians/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "librarians",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Librarian",
+              "request": {
                 "method": "POST",
-                "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"name\": \"Charlie Brown\",\n  \"email\": \"charlie@lms.com\",\n  \"phone\": \"555-0103\",\n  \"employeeId\": \"LIB-003\",\n  \"department\": \"Science\"\n}"},
-                "url": {"raw": "{{baseUrl}}/api/admin/librarians", "host": ["{{baseUrl}}"], "path": ["api", "admin", "librarians"]}
-              }
-            },
-            {
-              "name": "Get Librarian by ID",
-              "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-                "method": "GET",
-                "header": [],
-                "url": {"raw": "{{baseUrl}}/api/admin/librarians/1", "host": ["{{baseUrl}}"], "path": ["api", "admin", "librarians", "1"]}
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/librarians",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "librarians"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane@library.com\",\n  \"phone\": \"555-0200\",\n  \"employeeId\": \"EMP-003\",\n  \"department\": \"Fiction\"\n}"
+                }
               }
             },
             {
               "name": "Update Librarian",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
                 "method": "PUT",
-                "header": [{"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"name\": \"Charlie Brown Jr.\",\n  \"email\": \"charlie@lms.com\",\n  \"phone\": \"555-0103\",\n  \"employeeId\": \"LIB-003\",\n  \"department\": \"Science Fiction\"\n}"},
-                "url": {"raw": "{{baseUrl}}/api/admin/librarians/3", "host": ["{{baseUrl}}"], "path": ["api", "admin", "librarians", "3"]}
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/librarians/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "librarians",
+                    "1"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Jane Smith Updated\",\n  \"email\": \"jane.updated@library.com\",\n  \"phone\": \"555-0201\",\n  \"employeeId\": \"EMP-003\",\n  \"department\": \"Non-Fiction\"\n}"
+                }
               }
             },
             {
               "name": "Delete Librarian",
               "request": {
-                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
                 "method": "DELETE",
-                "header": [],
-                "url": {"raw": "{{baseUrl}}/api/admin/librarians/3", "host": ["{{baseUrl}}"], "path": ["api", "admin", "librarians", "3"]}
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/admin/librarians/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "librarians",
+                    "1"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "User - Books",
+          "item": [
+            {
+              "name": "Browse All Books",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/user/books?page=0&size=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "books"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Book Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/user/books/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "books",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Search Books (User)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/user/books/search?keyword=Java&category=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "books",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "keyword",
+                      "value": "Java"
+                    },
+                    {
+                      "key": "category",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Available Books",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/user/books/available",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "books",
+                    "available"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Categories",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{catalogPort}}/api/user/books/categories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{catalogPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "books",
+                    "categories"
+                  ]
+                }
               }
             }
           ]
@@ -324,125 +1043,1597 @@
       ]
     },
     {
-      "name": "4. Member Service (User)",
+      "name": "3. Member Service (8083)",
       "item": [
         {
-          "name": "Get My Profile",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/user/profile/1", "host": ["{{baseUrl}}"], "path": ["api", "user", "profile", "1"]}
-          }
+          "name": "Admin",
+          "item": [
+            {
+              "name": "Get All Members (pageable)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/admin/members?page=0&size=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "members"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Member By ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/admin/members/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "members",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Search Members",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/admin/members/search?name=User",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "members",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "name",
+                      "value": "User"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Register Member",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/admin/members",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "members"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New Member\",\n  \"email\": \"newmember@example.com\",\n  \"phone\": \"555-3333\",\n  \"address\": \"789 New St\",\n  \"membershipType\": \"PREMIUM\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Update Member (Admin)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/admin/members/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "members",
+                    "1"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"555-9999\",\n  \"address\": \"456 Updated St\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Deactivate Member",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/admin/members/1/deactivate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "members",
+                    "1",
+                    "deactivate"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reactivate Member",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/admin/members/1/reactivate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "members",
+                    "1",
+                    "reactivate"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Member",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/admin/members/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "members",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Member Stats",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/admin/members/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "members",
+                    "stats"
+                  ]
+                }
+              }
+            }
+          ]
         },
         {
-          "name": "Update My Profile",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
-            "method": "PUT",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Updated User One\",\n  \"phone\": \"555-9999\",\n  \"address\": \"456 Updated St\"\n}"},
-            "url": {"raw": "{{baseUrl}}/api/user/profile/1", "host": ["{{baseUrl}}"], "path": ["api", "user", "profile", "1"]}
-          }
-        },
-        {
-          "name": "Get Membership Details",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{userToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/user/profile/1/membership", "host": ["{{baseUrl}}"], "path": ["api", "user", "profile", "1", "membership"]}
-          }
+          "name": "User",
+          "item": [
+            {
+              "name": "Get My Profile",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/user/profile/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "profile",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update My Profile",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/user/profile/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "profile",
+                    "1"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"User One Updated\",\n  \"phone\": \"555-1111\",\n  \"address\": \"123 My New Address\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get My Membership",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{memberPort}}/api/user/profile/1/membership",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{memberPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "profile",
+                    "1",
+                    "membership"
+                  ]
+                }
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "5. Member Service (Admin)",
+      "name": "4. Borrowing Service (8084)",
       "item": [
         {
-          "name": "Get All Members",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/admin/members?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "admin", "members"], "query": [{"key": "page", "value": "0"}, {"key": "size", "value": "10"}]}
-          }
+          "name": "Admin - Borrows",
+          "item": [
+            {
+              "name": "Issue Book",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/admin/borrows/issue",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "borrows",
+                    "issue"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"memberId\": 1,\n  \"bookCopyId\": 202,\n  \"bookId\": 20,\n  \"librarianId\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Return Book (Admin)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/admin/borrows/return/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "borrows",
+                    "return",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get All Borrows (pageable)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/admin/borrows?page=0&size=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "borrows"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Overdue Borrows",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/admin/borrows/overdue",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "borrows",
+                    "overdue"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Waive Fine",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/admin/borrows/2/waive-fine",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "borrows",
+                    "2",
+                    "waive-fine"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Member Borrows (Admin)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/admin/borrows/member/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "borrows",
+                    "member",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Borrow Stats",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/admin/borrows/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "borrows",
+                    "stats"
+                  ]
+                }
+              }
+            }
+          ]
         },
         {
-          "name": "Get Member by ID",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/admin/members/2", "host": ["{{baseUrl}}"], "path": ["api", "admin", "members", "2"]}
-          }
+          "name": "Admin - Reservations",
+          "item": [
+            {
+              "name": "Get All Reservations",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/admin/borrows/reservations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "borrows",
+                    "reservations"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Fulfill Reservation",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/admin/borrows/reservations/1/fulfill",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "borrows",
+                    "reservations",
+                    "1",
+                    "fulfill"
+                  ]
+                }
+              }
+            }
+          ]
         },
         {
-          "name": "Search Members",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/admin/members/search?name=User", "host": ["{{baseUrl}}"], "path": ["api", "admin", "members", "search"], "query": [{"key": "name", "value": "User"}]}
-          }
+          "name": "User - Borrows",
+          "item": [
+            {
+              "name": "Get My Active Borrows",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/user/borrows/active/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "borrows",
+                    "active",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get My Borrow History",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/user/borrows/history/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "borrows",
+                    "history",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Return Book (User)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/user/borrows/return/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "borrows",
+                    "return",
+                    "1"
+                  ]
+                }
+              }
+            }
+          ]
         },
         {
-          "name": "Register Member Manually",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-            "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Alice Admin\",\n  \"email\": \"alice@example.com\",\n  \"phone\": \"555-5555\",\n  \"address\": \"789 Admin Rd\",\n  \"membershipType\": \"PREMIUM\"\n}"},
-            "url": {"raw": "{{baseUrl}}/api/admin/members", "host": ["{{baseUrl}}"], "path": ["api", "admin", "members"]}
-          }
-        },
-        {
-          "name": "Update Member Profile",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-            "method": "PUT",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Alice Admin Jr\",\n  \"phone\": \"555-5556\"\n}"},
-            "url": {"raw": "{{baseUrl}}/api/admin/members/5", "host": ["{{baseUrl}}"], "path": ["api", "admin", "members", "5"]}
-          }
-        },
-        {
-          "name": "Suspend Member",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-            "method": "PUT",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/admin/members/3/deactivate", "host": ["{{baseUrl}}"], "path": ["api", "admin", "members", "3", "deactivate"]}
-          }
-        },
-        {
-          "name": "Reactivate Member",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-            "method": "PUT",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/admin/members/3/reactivate", "host": ["{{baseUrl}}"], "path": ["api", "admin", "members", "3", "reactivate"]}
-          }
-        },
-        {
-          "name": "Delete Member",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-            "method": "DELETE",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/admin/members/3", "host": ["{{baseUrl}}"], "path": ["api", "admin", "members", "3"]}
-          }
-        },
-        {
-          "name": "Get Member Stats",
-          "request": {
-            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]},
-            "method": "GET",
-            "header": [],
-            "url": {"raw": "{{baseUrl}}/api/admin/members/stats", "host": ["{{baseUrl}}"], "path": ["api", "admin", "members", "stats"]}
-          }
+          "name": "User - Reservations",
+          "item": [
+            {
+              "name": "Create Reservation",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/user/borrows/reservations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "borrows",
+                    "reservations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"memberId\": 1,\n  \"bookId\": 2\n}"
+                }
+              }
+            },
+            {
+              "name": "Get My Reservations",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/user/borrows/reservations/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "borrows",
+                    "reservations",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Modify Reservation",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/user/borrows/reservations/1?newBookId=3",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "borrows",
+                    "reservations",
+                    "1"
+                  ],
+                  "query": [
+                    {
+                      "key": "newBookId",
+                      "value": "3"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Cancel Reservation",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{user1Token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}:{{borrowPort}}/api/user/borrows/reservations/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{borrowPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "borrows",
+                    "reservations",
+                    "1"
+                  ]
+                }
+              }
+            }
+          ]
         }
       ]
+    },
+    {
+      "name": "5. Payment Service (8085)",
+      "item": [
+        {
+          "name": "Admin - Payments",
+          "item": [
+            {
+              "name": "Get All Payments",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/admin/payments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "payments"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Pending Payments",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/admin/payments/pending",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "payments",
+                    "pending"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Refund Payment",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/admin/payments/1/refund",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "payments",
+                    "1",
+                    "refund"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Member Payment Summary (Admin)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/admin/payments/member/1/summary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "payments",
+                    "member",
+                    "1",
+                    "summary"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Revenue",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/admin/payments/revenue?month=5&year=2024",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "payments",
+                    "revenue"
+                  ],
+                  "query": [
+                    {
+                      "key": "month",
+                      "value": "5"
+                    },
+                    {
+                      "key": "year",
+                      "value": "2024"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin - Fine Policy",
+          "item": [
+            {
+              "name": "Get Current Policy",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/admin/payments/policy/current",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "payments",
+                    "policy",
+                    "current"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Policy History",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/admin/payments/policy/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "payments",
+                    "policy",
+                    "history"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Policy",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"finePerDay\": 10.00,\n    \"gracePeriodDays\": 2,\n    \"maxFineAmount\": 1000.00\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/admin/payments/policy/update",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "payments",
+                    "policy",
+                    "update"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "User - Payments",
+          "item": [
+            {
+              "name": "Process Cash Payment",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"memberId\": 1,\n    \"borrowRecordId\": 1,\n    \"amount\": 50.00,\n    \"paymentMethod\": \"CASH\",\n    \"notes\": \"Paid over counter\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/user/payments/pay",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "payments",
+                    "pay"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Razorpay Order",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"memberId\": 1,\n    \"borrowRecordId\": 1,\n    \"amount\": 100.00\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/user/payments/razorpay/create-order",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "payments",
+                    "razorpay",
+                    "create-order"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Verify Razorpay Payment",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"razorpayOrderId\": \"order_id_here\",\n    \"razorpayPaymentId\": \"pay_id_here\",\n    \"razorpaySignature\": \"signature_here\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/user/payments/razorpay/verify",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "payments",
+                    "razorpay",
+                    "verify"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get User Payments",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/user/payments/member/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "payments",
+                    "member",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get User Payment Summary",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{paymentPort}}/api/user/payments/member/1/summary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{paymentPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "payments",
+                    "member",
+                    "1",
+                    "summary"
+                  ]
+                }
+              }
+            }
+          ],
+          "auth": {
+            "type": "bearer",
+            "bearer": [
+              {
+                "key": "token",
+                "value": "{{user1Token}}",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{adminToken}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "6. Notification & Report Service (8086)",
+      "item": [
+        {
+          "name": "Admin - Reports",
+          "item": [
+            {
+              "name": "Get Dashboard Summary",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/reports/dashboard",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "reports",
+                    "dashboard"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Most Borrowed Books",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/reports/most-borrowed",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "reports",
+                    "most-borrowed"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Overdue Summary",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/reports/overdue-summary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "reports",
+                    "overdue-summary"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Monthly Borrow Stats",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/reports/monthly-stats?month=5&year=2024",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "reports",
+                    "monthly-stats"
+                  ],
+                  "query": [
+                    {
+                      "key": "month",
+                      "value": "5"
+                    },
+                    {
+                      "key": "year",
+                      "value": "2024"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Monthly Revenue",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/reports/revenue?month=5&year=2024",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "reports",
+                    "revenue"
+                  ],
+                  "query": [
+                    {
+                      "key": "month",
+                      "value": "5"
+                    },
+                    {
+                      "key": "year",
+                      "value": "2024"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Category Availability",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/reports/category-availability",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "reports",
+                    "category-availability"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Clear Caches",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/reports/cache",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "reports",
+                    "cache"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin - Notifications",
+          "item": [
+            {
+              "name": "Get All Notifications",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/notifications/all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "notifications",
+                    "all"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Notifications for Any Member",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/notifications/member/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "notifications",
+                    "member",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Send Borrow Confirmation",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"memberId\": 1,\n    \"bookTitle\": \"Clean Code\",\n    \"dueDate\": \"2024-06-01\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/notifications/send/borrow",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "notifications",
+                    "send",
+                    "borrow"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Send Overdue Alert",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"memberId\": 1,\n    \"bookTitle\": \"Clean Code\",\n    \"fineAmount\": 25.00\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/notifications/send/overdue",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "notifications",
+                    "send",
+                    "overdue"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Send Payment Receipt",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"memberId\": 1,\n    \"amount\": 50.00,\n    \"transactionId\": \"txn_12345\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/admin/notifications/send/payment",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "admin",
+                    "notifications",
+                    "send",
+                    "payment"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "User - Notifications",
+          "item": [
+            {
+              "name": "Get User Notifications",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/user/notifications/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "notifications",
+                    "1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Unread Notifications",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/user/notifications/1/unread",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "notifications",
+                    "1",
+                    "unread"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Mark Notification Read",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/user/notifications/1/read",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "notifications",
+                    "1",
+                    "read"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Mark All Read",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}:{{notifPort}}/api/user/notifications/1/read-all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "{{notifPort}}",
+                  "path": [
+                    "api",
+                    "user",
+                    "notifications",
+                    "1",
+                    "read-all"
+                  ]
+                }
+              }
+            }
+          ],
+          "auth": {
+            "type": "bearer",
+            "bearer": [
+              {
+                "key": "token",
+                "value": "{{user1Token}}",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{adminToken}}",
+            "type": "string"
+          }
+        ]
+      }
     }
   ]
 }
