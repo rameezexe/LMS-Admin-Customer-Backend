@@ -60,6 +60,7 @@ public class DataLoader implements CommandLineRunner {
                     .reservationDate(LocalDate.now())
                     .expiryDate(LocalDate.now().plusDays(3))
                     .status(ReservationStatus.PENDING)
+                    .queuePosition(1)
                     .build());
                     
             System.out.println("=== Borrowing DataLoader: Seeded 1 Reservation ===");

@@ -37,6 +37,10 @@ public class Reservation {
     @Column(nullable = false)
     private ReservationStatus status;
 
+    private Integer queuePosition;
+
+    private LocalDateTime readyAt;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

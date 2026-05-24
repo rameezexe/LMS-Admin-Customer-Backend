@@ -10,6 +10,7 @@ import com.lms.payment.entity.PaymentStatus;
 import com.lms.payment.repository.PaymentRepository;
 import com.lms.payment.security.SecurityHelper;
 import com.razorpay.RazorpayException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,11 +29,13 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final RazorpayService razorpayService;
     private final SecurityHelper securityHelper;
+    private final org.springframework.web.client.RestTemplate restTemplate;
 
-    public PaymentService(PaymentRepository paymentRepository, RazorpayService razorpayService, SecurityHelper securityHelper) {
+    public PaymentService(PaymentRepository paymentRepository, RazorpayService razorpayService, SecurityHelper securityHelper, org.springframework.web.client.RestTemplate restTemplate) {
         this.paymentRepository = paymentRepository;
         this.razorpayService = razorpayService;
         this.securityHelper = securityHelper;
+        this.restTemplate = restTemplate;
     }
 
     private PaymentResponseDTO mapToDTO(Payment payment) {
@@ -76,7 +79,26 @@ public class PaymentService {
                 .notes(notes)
                 .build();
 
-        return mapToDTO(paymentRepository.save(payment));
+        Payment saved = paymentRepository.save(payment);
+        sendPaymentNotification(saved.getMemberId(), saved.getAmount(), saved.getTransactionId());
+        return mapToDTO(saved);
+    }
+
+    public void sendPaymentNotification(Long memberId, BigDecimal amount, String transactionId) {
+        try {
+            java.util.Map<String, Object> request = new java.util.HashMap<>();
+            request.put("memberId", memberId);
+            request.put("amount", amount);
+            request.put("transactionId", transactionId);
+
+            restTemplate.postForEntity(
+                    "http://NOTIFICATION-REPORT-SERVICE/api/internal/notifications/send/payment",
+                    request,
+                    Object.class
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to send payment notification: " + e.getMessage());
+        }
     }
 
     public List<PaymentResponseDTO> getPaymentsByMember(Long memberId) {
@@ -88,7 +110,7 @@ public class PaymentService {
 
     public PaymentResponseDTO getPaymentById(Long id) {
         Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Payment not found with id: " + id));
         verifyOwnership(payment.getMemberId());
         return mapToDTO(payment);
     }
@@ -106,9 +128,18 @@ public class PaymentService {
     @Transactional
     public RefundResponseDTO refundPayment(Long paymentId) throws RazorpayException {
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Payment not found with id: " + paymentId));
 
-        if (payment.getPaymentMethod() == PaymentMethod.RAZORPAY) {
+        if (payment.getStatus() != PaymentStatus.COMPLETED && payment.getStatus() != PaymentStatus.PENDING) {
+            throw new IllegalArgumentException("Only completed or pending payments can be refunded");
+        }
+
+        // For Razorpay payments with a valid transaction ID, attempt API refund.
+        // Surface failures — don't silently mark as refunded locally,
+        // which would let admin see "success" while the customer is never refunded.
+        if (payment.getPaymentMethod() == PaymentMethod.RAZORPAY
+                && payment.getTransactionId() != null
+                && !payment.getTransactionId().isBlank()) {
             return razorpayService.refundRazorpayPayment(paymentId);
         }
 
@@ -116,10 +147,7 @@ public class PaymentService {
             throw new IllegalArgumentException("Cash payments are non-refundable");
         }
 
-        if (payment.getStatus() != PaymentStatus.COMPLETED) {
-            throw new IllegalArgumentException("Only completed payments can be refunded");
-        }
-
+        // For non-Razorpay or Razorpay-pending payments, refund locally
         payment.setStatus(PaymentStatus.REFUNDED);
         paymentRepository.save(payment);
 

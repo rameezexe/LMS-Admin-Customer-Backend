@@ -93,7 +93,14 @@ public class NotificationService {
 
     @Transactional
     public NotificationDTO sendReservationConfirmation(Long memberId, String bookTitle) {
-        String message = "Reservation confirmed for '" + bookTitle + "'. Pick up in 3 days.";
+        String message = "Reservation confirmed for '" + bookTitle + "'. We'll notify you when a copy is ready for pickup.";
+        return createAndSend(memberId, NotificationType.RESERVATION_ALERT, message);
+    }
+
+    @Transactional
+    public NotificationDTO sendReservationReady(Long memberId, String bookTitle, Integer pickupWindowDays) {
+        int days = pickupWindowDays == null ? 3 : pickupWindowDays;
+        String message = "'" + bookTitle + "' is ready for pickup. Please collect within " + days + " day(s).";
         return createAndSend(memberId, NotificationType.RESERVATION_ALERT, message);
     }
 

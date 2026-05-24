@@ -5,6 +5,7 @@ import com.lms.member.entity.MembershipType;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -20,4 +21,11 @@ public class MemberDTO {
     private MemberStatus status;
     private LocalDate joinDate;
     private String profilePhotoUrl;
+
+    // ── Registration fields ──
+    private String governmentIdUrl;
+    private String membershipDuration;
+    private BigDecimal membershipAmount;
+    private String membershipPaymentId;
+    private LocalDate membershipExpiryDate;
 }

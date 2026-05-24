@@ -1,5 +1,5 @@
 package com.lms.member.entity;
 
 public enum MemberStatus {
-    ACTIVE, SUSPENDED
+    PENDING_APPROVAL, ACTIVE, SUSPENDED, DECLINED
 }

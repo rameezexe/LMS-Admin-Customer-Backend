@@ -52,8 +52,8 @@ public class S3Service {
         if (file.getSize() > maxSize)
             throw new IllegalArgumentException("File size must not exceed 5MB");
         String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/"))
-            throw new IllegalArgumentException("Only image files are allowed (jpg, png, webp)");
+        if (contentType == null || (!contentType.startsWith("image/") && !contentType.equals("application/pdf")))
+            throw new IllegalArgumentException("Only image files and PDFs are allowed");
     }
 
     private String sanitizeFilename(String original) {

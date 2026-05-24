@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByStatus(ReservationStatus status);
 
     List<Reservation> findByExpiryDateBeforeAndStatus(LocalDate date, ReservationStatus status);
-    
+
     Optional<Reservation> findByMemberIdAndBookIdAndStatus(Long memberId, Long bookId, ReservationStatus status);
+
+    Optional<Reservation> findFirstByMemberIdAndBookIdAndStatusIn(Long memberId, Long bookId, Collection<ReservationStatus> statuses);
+
+    long countByMemberIdAndStatusIn(Long memberId, Collection<ReservationStatus> statuses);
+
+    long countByBookIdAndStatusIn(Long bookId, Collection<ReservationStatus> statuses);
+
+    Optional<Reservation> findFirstByBookIdAndStatusOrderByQueuePositionAsc(Long bookId, ReservationStatus status);
 }

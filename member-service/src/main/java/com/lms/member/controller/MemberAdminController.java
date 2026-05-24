@@ -115,4 +115,26 @@ public class MemberAdminController {
                 .build();
         return ResponseEntity.ok(ApiResponse.ok("Stats retrieved successfully", stats));
     }
+
+    // ── Approval Workflow ────────────────────────────────────────────────
+
+    @GetMapping("/pending")
+    @Operation(summary = "Get all members pending approval")
+    public ResponseEntity<ApiResponse<java.util.List<MemberDTO>>> getPendingMembers() {
+        return ResponseEntity.ok(ApiResponse.ok("Pending members retrieved", memberService.getPendingMembers()));
+    }
+
+    @PutMapping("/{id}/approve")
+    @Operation(summary = "Approve a pending member")
+    public ResponseEntity<ApiResponse<MemberDTO>> approveMember(@PathVariable Long id) {
+        MemberDTO member = memberService.approveMember(id);
+        return ResponseEntity.ok(ApiResponse.ok("Member approved successfully", member));
+    }
+
+    @PutMapping("/{id}/decline")
+    @Operation(summary = "Decline a pending member and trigger refund")
+    public ResponseEntity<ApiResponse<MemberDTO>> declineMember(@PathVariable Long id) {
+        MemberDTO member = memberService.declineMember(id);
+        return ResponseEntity.ok(ApiResponse.ok("Member declined and refund initiated", member));
+    }
 }

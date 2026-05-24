@@ -71,8 +71,8 @@ public class ReportService {
             ResponseEntity<String> borrowResponse = restTemplate.exchange(
                     "http://borrowing-service/api/admin/borrows/stats", HttpMethod.GET, entity, String.class);
             JsonNode borrowNode = objectMapper.readTree(borrowResponse.getBody());
-            totalActiveBorrows = borrowNode.path("data").path("activeBorrows").asLong(0);
-            totalOverdue = borrowNode.path("data").path("overdueBorrows").asLong(0);
+            totalActiveBorrows = borrowNode.path("data").path("totalActive").asLong(0);
+            totalOverdue = borrowNode.path("data").path("totalOverdue").asLong(0);
             totalFinesUnpaid = borrowNode.path("data").path("totalFinesUnpaid").asDouble(0.0);
         } catch (Exception e) {
             log.error("Failed to fetch from borrowing-service", e);

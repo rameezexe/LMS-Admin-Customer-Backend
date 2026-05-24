@@ -1,5 +1,5 @@
 package com.lms.borrowing.entity;
 
 public enum ReservationStatus {
-    PENDING, FULFILLED, CANCELLED, EXPIRED
+    PENDING, READY_FOR_PICKUP, FULFILLED, CANCELLED, EXPIRED
 }

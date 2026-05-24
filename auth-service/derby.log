@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Sun May 10 13:31:01 IST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-019e-10e7-6597-00000242b640 
+Sun May 24 16:45:11 IST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-019e-59b2-315e-000002e7c860 
 on database directory /Users/rameez/TCS/LMS (Customer + Admin) Backend/auth-service/data/authDB with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397 
 Loaded from file:/Users/rameez/.m2/repository/org/apache/derby/derby/10.16.1.1/derby-10.16.1.1.jar
 java.vendor=Homebrew

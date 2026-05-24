@@ -66,4 +66,70 @@ public class AuthController {
         authService.changePassword(request, authentication.getName());
         return ResponseEntity.ok(ApiResponse.ok("Password changed successfully", null));
     }
+
+    @PostMapping("/forgot-password")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Request password reset OTP via email")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequestDTO request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok(ApiResponse.ok("OTP sent to your email", null));
+    }
+
+    @PostMapping("/reset-password")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Reset password using OTP")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequestDTO request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.ok("Password reset successfully", null));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // PUBLIC REGISTRATION FLOW (email-OTP → initiate → Razorpay → complete)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    @PostMapping("/email/send-otp")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Send email-ownership OTP for new registrations")
+    public ResponseEntity<ApiResponse<Void>> sendRegistrationOtp(@Valid @RequestBody EmailOtpRequestDTO request) {
+        authService.sendRegistrationOtp(request.getEmail());
+        return ResponseEntity.ok(ApiResponse.ok("OTP sent", null));
+    }
+
+    @PostMapping("/email/verify-otp")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Verify the registration OTP and obtain a short-lived verificationToken")
+    public ResponseEntity<ApiResponse<EmailVerificationResponseDTO>> verifyRegistrationOtp(
+            @Valid @RequestBody VerifyEmailOtpRequestDTO request) {
+        EmailVerificationResponseDTO response = authService.verifyRegistrationOtp(request.getEmail(), request.getOtp());
+        return ResponseEntity.ok(ApiResponse.ok("Email verified", response));
+    }
+
+    @GetMapping("/username-available")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Check whether a username is free")
+    public ResponseEntity<ApiResponse<UsernameAvailabilityResponseDTO>> isUsernameAvailable(
+            @org.springframework.web.bind.annotation.RequestParam String username) {
+        boolean available = authService.isUsernameAvailable(username);
+        return ResponseEntity.ok(ApiResponse.ok("ok", UsernameAvailabilityResponseDTO.builder().available(available).build()));
+    }
+
+    @PostMapping("/registration/initiate")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Validate signup data + create a Razorpay order. User account is NOT created yet.")
+    public ResponseEntity<ApiResponse<RegistrationInitiateResponseDTO>> initiateRegistration(
+            @Valid @RequestBody RegistrationInitiateRequestDTO request) {
+        RegistrationInitiateResponseDTO response = authService.initiateRegistration(request);
+        return ResponseEntity.ok(ApiResponse.ok("Registration initiated", response));
+    }
+
+    @PostMapping("/registration/complete")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Verify the Razorpay payment and create the user account + member.")
+    public ResponseEntity<ApiResponse<UserAccountResponseDTO>> completeRegistration(
+            @Valid @RequestBody RegistrationCompleteRequestDTO request) {
+        UserAccountResponseDTO response = authService.completeRegistration(request);
+        return ResponseEntity.ok(ApiResponse.ok("Registration complete", response));
+    }
 }

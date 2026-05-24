@@ -53,8 +53,6 @@ public class PaymentUserController {
     @PostMapping("/razorpay/verify")
     @Operation(summary = "Verify Razorpay payment")
     public ResponseEntity<ApiResponse<PaymentResponseDTO>> verifyRazorpayPayment(@Valid @RequestBody RazorpayVerifyRequestDTO request) {
-        paymentService.getPaymentById(1L); // Just to test ownership logic if needed, but verifyPayment logic doesn't explicitly check ownership inside razorpayService yet because it needs razorpayOrderId. We can let Razorpay logic handle it or just allow any valid signature to complete the payment.
-
         // For simplicity, we just verify the payment signature.
         return ResponseEntity.ok(ApiResponse.ok("Payment verified successfully",
                 paymentService.getPaymentById(razorpayService.verifyPayment(

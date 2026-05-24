@@ -24,4 +24,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     long countByMembershipType(MembershipType membershipType);
 
     boolean existsByEmail(String email);
+
+    java.util.List<Member> findByStatus(MemberStatus status);
 }

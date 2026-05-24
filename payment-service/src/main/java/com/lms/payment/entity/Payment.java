@@ -15,10 +15,14 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    /**
+     * Nullable for membership payments created during pre-pay registration —
+     * the member row doesn't exist yet. Auth-service attaches the real
+     * memberId after payment is verified and the Member is created.
+     */
     private Long memberId;
 
-    @Column(nullable = false)
+    // Nullable for membership payments (no borrow record)
     private Long borrowRecordId;
 
     @Column(nullable = false, precision = 10, scale = 2)
@@ -43,6 +47,11 @@ public class Payment {
     private String razorpaySignature;
 
     private String notes;
+
+    // FINE or MEMBERSHIP
+    @Column(length = 20)
+    @Builder.Default
+    private String purpose = "FINE";
 
     @Column(updatable = false)
     private LocalDateTime createdAt;

@@ -4,6 +4,7 @@ import com.lms.borrowing.dto.ApiResponse;
 import com.lms.borrowing.dto.BorrowRequestDTO;
 import com.lms.borrowing.dto.BorrowResponseDTO;
 import com.lms.borrowing.dto.MemberDTO;
+import com.lms.borrowing.dto.BookDTO;
 import com.lms.borrowing.entity.BorrowRecord;
 import com.lms.borrowing.entity.BorrowStatus;
 import com.lms.borrowing.repository.BorrowRecordRepository;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
@@ -28,10 +30,14 @@ public class BorrowService {
 
     private final BorrowRecordRepository borrowRecordRepository;
     private final RestTemplate restTemplate;
+    private final ReservationService reservationService;
 
-    public BorrowService(BorrowRecordRepository borrowRecordRepository, RestTemplate restTemplate) {
+    public BorrowService(BorrowRecordRepository borrowRecordRepository,
+                         RestTemplate restTemplate,
+                         ReservationService reservationService) {
         this.borrowRecordRepository = borrowRecordRepository;
         this.restTemplate = restTemplate;
+        this.reservationService = reservationService;
     }
 
     public BorrowResponseDTO issueBook(BorrowRequestDTO request) {
@@ -48,6 +54,7 @@ public class BorrowService {
                 });
 
         // RULE 3: Member status must be ACTIVE
+        MemberDTO member;
         try {
             ResponseEntity<ApiResponse<MemberDTO>> response = restTemplate.exchange(
                     "http://MEMBER-SERVICE/api/admin/members/" + request.getMemberId(),
@@ -57,15 +64,15 @@ public class BorrowService {
             );
 
             if (response.getBody() == null || response.getBody().getData() == null) {
-                throw new EntityNotFoundException("Member not found in member-service.");
+                throw new EntityNotFoundException("Member " + request.getMemberId() + " not found.");
             }
+            member = response.getBody().getData();
+        } catch (RestClientException e) {
+            throw new IllegalStateException("Failed to reach member-service: " + e.getMessage());
+        }
 
-            MemberDTO member = response.getBody().getData();
-            if (!"ACTIVE".equals(member.getStatus())) {
-                throw new IllegalStateException("Member status is not ACTIVE. Cannot issue book.");
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to verify member status: " + e.getMessage());
+        if (!"ACTIVE".equals(member.getStatus())) {
+            throw new IllegalStateException("Member status is " + member.getStatus() + ". Cannot issue book.");
         }
 
         BorrowRecord record = BorrowRecord.builder()
@@ -78,7 +85,45 @@ public class BorrowService {
                 .issuedByLibrarianId(request.getLibrarianId())
                 .build();
 
-        return toDTO(borrowRecordRepository.save(record));
+        BorrowRecord saved = borrowRecordRepository.save(record);
+
+        // Fetch Book Title
+        String bookTitle = "Book ID: " + request.getBookId();
+        try {
+            ResponseEntity<ApiResponse<BookDTO>> bookResponse = restTemplate.exchange(
+                    "http://CATALOG-SERVICE/api/user/books/" + request.getBookId(),
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+            if (bookResponse.getBody() != null && bookResponse.getBody().getData() != null) {
+                bookTitle = bookResponse.getBody().getData().getTitle();
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to fetch book title: " + e.getMessage());
+        }
+
+        // Send Notification
+        sendBorrowNotification(saved.getMemberId(), bookTitle, saved.getDueDate().toString());
+
+        return toDTO(saved);
+    }
+
+    private void sendBorrowNotification(Long memberId, String bookTitle, String dueDate) {
+        try {
+            java.util.Map<String, Object> request = new java.util.HashMap<>();
+            request.put("memberId", memberId);
+            request.put("bookTitle", bookTitle);
+            request.put("dueDate", dueDate);
+
+            restTemplate.postForEntity(
+                    "http://NOTIFICATION-REPORT-SERVICE/api/internal/notifications/send/borrow",
+                    request,
+                    Object.class
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to send borrow notification: " + e.getMessage());
+        }
     }
 
     public BorrowResponseDTO returnBook(Long recordId, Long requestMemberId, boolean isAdmin) {
@@ -96,12 +141,21 @@ public class BorrowService {
         record.setReturnDate(LocalDate.now());
         record.setStatus(BorrowStatus.RETURNED);
 
-        if (LocalDate.now().isAfter(record.getDueDate())) {
+        // Don't recompute the fine if it has already been waived or paid.
+        if (!record.isFinePaid() && LocalDate.now().isAfter(record.getDueDate())) {
             long daysOverdue = ChronoUnit.DAYS.between(record.getDueDate(), LocalDate.now());
             record.setFineAmount(BigDecimal.valueOf(daysOverdue * 5));
         }
 
-        return toDTO(borrowRecordRepository.save(record));
+        BorrowRecord saved = borrowRecordRepository.save(record);
+
+        try {
+            reservationService.promoteNextReservation(saved.getBookId());
+        } catch (Exception e) {
+            System.err.println("[BorrowService] Failed to promote next reservation: " + e.getMessage());
+        }
+
+        return toDTO(saved);
     }
 
     public List<BorrowResponseDTO> getActiveBorrows(Long memberId) {
@@ -144,21 +198,19 @@ public class BorrowService {
     }
 
     public long getTotalActive() {
-        return borrowRecordRepository.findByStatus(BorrowStatus.ACTIVE).size();
+        return borrowRecordRepository.countByStatus(BorrowStatus.ACTIVE);
     }
 
     public long getTotalOverdue() {
-        return borrowRecordRepository.findByStatus(BorrowStatus.OVERDUE).size();
+        return borrowRecordRepository.countByStatus(BorrowStatus.OVERDUE);
     }
 
     public long getTotalReturned() {
-        return borrowRecordRepository.findByStatus(BorrowStatus.RETURNED).size();
+        return borrowRecordRepository.countByStatus(BorrowStatus.RETURNED);
     }
 
     public long getTotalFinesUnpaid() {
-        return borrowRecordRepository.findByStatus(BorrowStatus.OVERDUE).stream()
-                .filter(b -> !b.isFinePaid())
-                .count();
+        return borrowRecordRepository.countByFinePaidFalseAndFineAmountGreaterThan(BigDecimal.ZERO);
     }
 
     private BorrowResponseDTO toDTO(BorrowRecord record) {

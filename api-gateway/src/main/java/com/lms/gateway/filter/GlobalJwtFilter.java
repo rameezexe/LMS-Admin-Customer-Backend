@@ -30,7 +30,16 @@ public class GlobalJwtFilter implements GlobalFilter, Ordered {
     private static final List<String> PUBLIC_PATHS = List.of(
             "/api/auth/login",
             "/api/auth/register",
-            "/api/auth/refresh"
+            "/api/auth/refresh",
+            "/api/auth/forgot-password",
+            "/api/auth/reset-password",
+            // ── New pre-pay registration flow (email-OTP → initiate → complete) ──
+            "/api/auth/email/send-otp",
+            "/api/auth/email/verify-otp",
+            "/api/auth/username-available",
+            "/api/auth/registration/initiate",
+            "/api/auth/registration/complete",
+            "/api/internal/"
     );
 
     public GlobalJwtFilter(JwtUtil jwtUtil) {

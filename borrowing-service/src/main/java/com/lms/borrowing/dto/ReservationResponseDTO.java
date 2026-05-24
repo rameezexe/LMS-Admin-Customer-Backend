@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -15,4 +16,6 @@ public class ReservationResponseDTO {
     private LocalDate reservationDate;
     private LocalDate expiryDate;
     private ReservationStatus status;
+    private Integer queuePosition;
+    private LocalDateTime readyAt;
 }
